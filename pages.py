@@ -1185,8 +1185,7 @@ def gungu_page(sido_slug, sido_name, sido_url, slug, gu_name, lead, paras, jobs,
 </main>
 """
     title = f"{gu_name} 배관·하수구막힘·누수탐지 24시간 출동 - 스피드 배관공사"
-    desc = (f"{sido_name} {gu_name} 상업시설 배관 전문. {gu_name}의 하수구막힘, 배관공사, 누수탐지, "
-            f"고압세척을 24시간 신속 출동으로 해결합니다. 선견적 후작업, 추가금 없음.")
+    desc = f"{gu_name} 하수구막힘·배관공사·누수탐지·고압세척 24시간 출동. 선견적 후작업, 추가금 없음."
     page(f"area/{sido_slug}/{slug}.html", title, desc, f"{S}/area/{sido_slug}/{slug}.html",
          body, jsonld=breadcrumb_jsonld(crumbs))
 
