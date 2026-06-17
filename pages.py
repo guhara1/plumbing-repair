@@ -628,7 +628,7 @@ def area_index():
     cards = ""
     for s in SIDO:
         u = links.get(s, "/area/")
-        cards += f'<a class="link-card" href="{u}"><h3>{s}</h3><p>{s} 전역 상업시설 배관 출동</p></a>'
+        cards += f'<a class="link-card" href="{u}"><h3>{s}</h3></a>'
     body = f"""{phero("Nationwide", "지역별 서비스", "스피드 배관공사는 전국 17개 시·도에서 호텔·상가·빌딩 배관 서비스를 제공합니다. 지역을 선택하면 해당 지역의 출동 안내와 시공사례를 확인할 수 있습니다.", [("홈","/"),("지역별 서비스",None)])}
 <main>
 <section class="section">
@@ -655,11 +655,11 @@ def sido_page(slug, name, short, intro, districts, district_links, cases_html, p
     if full:
         for d in full:
             u = gungu_url(slug, d)
-            dcards += f'<a class="link-card" href="{u}"><h3>{d}</h3><p>{name} {d} 배관·하수구막힘 상담</p></a>'
+            dcards += f'<a class="link-card" href="{u}"><h3>{d}</h3></a>'
     else:
         # 세종 등 시군구가 없는 경우: 전달된 동 목록을 비링크 카드로 안내
         for d in districts:
-            dcards += f'<div class="link-card" style="opacity:.9"><h3>{d}</h3><p>{name} {d} 상담 가능</p></div>'
+            dcards += f'<div class="link-card" style="opacity:.9"><h3>{d}</h3></div>'
     body = f"""{phero(f"{name} 서비스", f"{name} 배관·하수구막힘 24시간 출동", intro, crumbs)}
 <main>
 <section class="section">
