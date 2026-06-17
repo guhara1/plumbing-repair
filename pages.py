@@ -2429,3 +2429,54 @@ build_gu_system("서울특별시","seoul","/area/seoul/","영등포구","yeongde
     [("마포구","/area/seoul/mapo-gu/"),("동작구","/area/seoul/dongjak-gu/"),("구로구","/area/seoul/guro-gu/"),("양천구","/area/seoul/yangcheon-gu/")])
 
 print("\\n강동·마포·영등포 구+행정동 생성 완료.")
+
+# ===========================================================================
+# sitemap.xml 자동 생성 (pages.py 빌드 시 항상 최신 도메인·URL 반영)
+# ===========================================================================
+import glob as _glob, datetime as _dt
+
+_TODAY = _dt.date.today().isoformat()
+_ROOT = _os.path.dirname(_os.path.abspath(__file__))
+
+def _sm_priority(path):
+    if path in ("index.html",): return "1.0"
+    if path.startswith("service/") or path.startswith("area/") or path in (
+            "contact.html","cases.html","price.html","review.html","about.html","faq.html"):
+        return "0.8"
+    return "0.5"
+
+def _sm_changefreq(path):
+    if path == "index.html": return "weekly"
+    if path.startswith("area/") or path.startswith("service/"): return "monthly"
+    return "monthly"
+
+_html_files = sorted(_glob.glob(_os.path.join(_ROOT, "**/*.html"), recursive=True)
+                     + _glob.glob(_os.path.join(_ROOT, "*.html")))
+
+_seen_urls = set()
+_sm_urls = []
+for _f in sorted(set(_html_files)):
+    _rel = _os.path.relpath(_f, _ROOT).replace("\\\\", "/")
+    if any(_rel.startswith(x) for x in ("assets/","tools/","404")): continue
+    if _rel.endswith("index.html"):
+        _url = S + "/" + (_rel[:-len("index.html")].rstrip("/") or "")
+        if not _url.endswith("/"): _url += "/"
+    else:
+        _url = S + "/" + _rel
+    if _url not in _seen_urls:
+        _seen_urls.add(_url)
+        _sm_urls.append((_url, _rel))
+
+_sm_lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+for _url, _rel in _sm_urls:
+    _sm_lines.append(
+        f'  <url><loc>{_url}</loc><lastmod>{_TODAY}</lastmod>'
+        f'<changefreq>{_sm_changefreq(_rel)}</changefreq>'
+        f'<priority>{_sm_priority(_rel)}</priority></url>')
+_sm_lines.append('</urlset>')
+
+with open(_os.path.join(_ROOT, "sitemap.xml"), "w", encoding="utf-8") as _smf:
+    _smf.write("\n".join(_sm_lines) + "\n")
+
+print(f"sitemap.xml 생성 완료: {len(_sm_urls)} URLs")

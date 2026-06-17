@@ -1,8 +1,14 @@
 User-agent: *
 Allow: /
+Disallow: /tools/
+Disallow: /assets/data/
 
 # 네이버 검색 로봇
 User-agent: Yeti
+Allow: /
+
+# 구글봇
+User-agent: Googlebot
 Allow: /
 
 Sitemap: https://plumbing-repair.pages.dev/sitemap.xml

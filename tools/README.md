@@ -1,6 +1,6 @@
 # 색인(인덱싱) 빠르게 만들기 — 운영 가이드
 
-도메인: `https://plumbing-works.pages.dev`
+도메인: `https://plumbing-repair.pages.dev`
 
 ## 0. 한눈에
 | 채널 | 방법 | 즉시성 |
@@ -40,7 +40,7 @@ python3 tools/google_index.py --from-sitemap     # 전체(일 200건 쿼터 주�
 ```
 
 ## 3. 검색엔진 콘솔 등록(최초 1회, 가장 중요)
-- **네이버 서치어드바이저**: 사이트 등록 → 소유확인(이미 메타 적용됨) → 사이트맵 제출 `https://plumbing-works.pages.dev/sitemap.xml` → RSS 제출 `…/rss.xml`
+- **네이버 서치어드바이저**: 사이트 등록 → 소유확인(이미 메타 적용됨) → 사이트맵 제출 `https://plumbing-repair.pages.dev/sitemap.xml` → RSS 제출 `…/rss.xml`
 - **구글 서치콘솔**: 속성 등록 → 소유확인 → 사이트맵 제출(동일)
 - **Bing 웹마스터도구**: 사이트 등록 → 사이트맵 제출(+IndexNow 자동 연동)
 

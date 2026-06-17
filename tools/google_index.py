@@ -21,7 +21,7 @@ Google은 IndexNow 미참여이므로 별도로 사용합니다.
 """
 import sys, os, re, json
 
-SITE = "https://plumbing-works.pages.dev"
+SITE = "https://plumbing-repair.pages.dev"
 SA_FILE = os.path.join(os.path.dirname(__file__), "google_sa.json")
 ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
 SCOPES = ["https://www.googleapis.com/auth/indexing"]
