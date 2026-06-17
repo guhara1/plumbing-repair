@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" role="img" aria-label="BEFORE">
+  <rect width="400" height="300" fill="#2a3138"/>
+  <g opacity="0.9">
+    <rect x="60" y="120" width="280" height="60" rx="14" fill="#5E708A"/>
+    <circle cx="90" cy="150" r="16" fill="#08182F" opacity="0.25"/>
+    <circle cx="310" cy="150" r="16" fill="#08182F" opacity="0.25"/>
+    <path d="M120 150 H280" stroke="#FBFCFE" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  </g>
+  <text x="200" y="250" font-family="sans-serif" font-size="22" font-weight="700" fill="#FBFCFE" text-anchor="middle" opacity="0.85">BEFORE</text>
+</svg>

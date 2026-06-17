@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p assets/css assets/js assets/logo assets/img service area/seoul area/gyeonggi area/busan)",
+      "Bash(cp \"/tmp/brief_extract/심볼마크.png\" \"assets/logo/symbol.png\")",
+      "Bash(cp \"/tmp/brief_extract/로고_가로_화이트\\(어두운배경용\\).png\" \"assets/logo/logo-horizontal-white.png\")",
+      "Bash(cp \"/tmp/brief_extract/로고_가로_기본\\(밝은배경용\\).png\" \"assets/logo/logo-horizontal-dark.png\")",
+      "Bash(cp \"/tmp/brief_extract/로고_세로형.png\" \"assets/logo/logo-vertical.png\")"
+    ]
+  }
+}
