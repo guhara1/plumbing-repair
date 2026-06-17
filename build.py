@@ -9,7 +9,7 @@
 import os
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-SITE = "https://plumbing-works.pages.dev"
+SITE = "https://plumbing-repair.pages.dev"
 
 # 공식 채널 URL (확정 후 실제 주소로 교체) — 자리표시값
 NAVER_PLACE = "https://map.naver.com/"      # TODO: 네이버 플레이스(스마트플레이스) 실제 URL
