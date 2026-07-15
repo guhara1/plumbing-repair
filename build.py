@@ -11,6 +11,13 @@ import os
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = "https://plumbing-repair.pages.dev"
 
+# 대표 고객 검색 키워드 — 전 페이지 공통 meta keywords 및 본문 SEO 반영
+KEYWORDS = ("누수탐지, 누수공사, 하수구막힘, 배관막힘, 배관설비, 수전교체, 싱크대수전교체, "
+            "화장실수전교체, 변기막힘, 화장실변기교체, 변기부속품수리, 싱크대하수구막힘, "
+            "세면대막힘, 세면대교체, 배수구막힘, 배수구뚫음, 욕실배관누수, 수도누수, 수도수리, "
+            "주방배관누수, 주방배수구막힘, 이물질제거, 배관내시경, 역류, 물샘, 배관부품, "
+            "배관업체, 배관공사, 배관수리비용, 배관수리가격, 고압세척, 24시 긴급출동")
+
 # 공식 채널 URL (확정 후 실제 주소로 교체) — 자리표시값
 NAVER_PLACE = "https://map.naver.com/"      # TODO: 네이버 플레이스(스마트플레이스) 실제 URL
 NAVER_BLOG  = "https://blog.naver.com/"      # TODO: 네이버 블로그 실제 URL
@@ -20,7 +27,7 @@ KAKAO_CH    = "https://pf.kakao.com/"        # TODO: 카카오톡 채널 실제 
 # ---------------------------------------------------------------------------
 # 공통 조각
 # ---------------------------------------------------------------------------
-def head(title, desc, canonical, jsonld="", og_title=None, og_desc=None, robots="index, follow"):
+def head(title, desc, canonical, jsonld="", og_title=None, og_desc=None, robots="index, follow", keywords=KEYWORDS):
     og_title = og_title or title
     og_desc = og_desc or desc
     blocks = ""
@@ -33,6 +40,7 @@ def head(title, desc, canonical, jsonld="", og_title=None, og_desc=None, robots=
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
+<meta name="keywords" content="{keywords}">
 <link rel="canonical" href="{canonical}">
 <meta name="robots" content="{robots}">
 <meta name="googlebot" content="{robots}">
