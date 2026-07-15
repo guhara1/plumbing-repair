@@ -2,10 +2,68 @@
 # -*- coding: utf-8 -*-
 """모든 페이지 콘텐츠 정의 후 빌드. 사용: python3 pages.py"""
 from build import (page, SITE, breadcrumb_jsonld, SIDEBAR, bottom_cta,
-                   NAVER_PLACE, NAVER_BLOG, NAVER_TALK, KAKAO_CH)
-import json as _json, os as _os
+                   NAVER_PLACE, NAVER_BLOG, NAVER_TALK, KAKAO_CH,
+                   gallery_figure, GALLERY_COUNT)
+import json as _json, os as _os, hashlib as _hl
 
 S = SITE
+
+# ===========================================================================
+# 시공 갤러리 섹션 — 메인 21장 전체 / 지역 페이지 6장 순환(지역명 시드)
+#   실제 이미지는 build.py 의 GALLERY_READY 를 True 로 바꾸면 일괄 반영
+# ===========================================================================
+_GALLERY_WORKS = [
+    "하수구막힘 관통 작업", "고압세척 배수관 세척", "누수탐지 현장", "수전교체 시공",
+    "변기막힘 해결 작업", "세면대 교체 시공", "배수구뚫음 작업", "배관 누수공사",
+    "배관내시경 관로검사", "싱크대하수구막힘 처리", "욕실배관누수 보수", "주방배수구막힘 세척",
+    "화장실 변기교체", "변기부속품수리", "수도누수 잡기", "배관설비 교체",
+    "상가·음식점 배관공사", "정화조·오수관 준설", "이물질제거 작업", "배관 이음부 수리",
+    "수도수리·물샘 보수",
+]
+
+def _gallery_alt(region, n):
+    work = _GALLERY_WORKS[(int(n) - 1) % len(_GALLERY_WORKS)]
+    pre = f"{region} " if region else ""
+    return f"{pre}스피드 배관공사 시공사진 — {work}"
+
+def gallery_section(region="", seed=None, n=None, title=None, lead=None):
+    """시공 갤러리 섹션. region 없으면(메인) 21장 전체, 지역 페이지는 seed 기반 순환 선택."""
+    total = GALLERY_COUNT
+    if seed is None:                       # 메인 — 전체 노출
+        count = n or total
+        idxs = list(range(1, count + 1))
+    else:                                  # 지역 — 21장 중 일부를 시드로 회전 선택
+        count = n or 6
+        start = int(_hl.md5(str(seed).encode("utf-8")).hexdigest(), 16) % total
+        idxs = [((start + i) % total) + 1 for i in range(count)]
+    title = title or (f"{region} 시공 갤러리" if region else "시공 갤러리")
+    lead = lead or ("실제 현장에서 촬영한 하수구막힘·누수탐지·수전교체·배수구뚫음·고압세척 작업 사진입니다. "
+                    "누적된 시공 사진을 모았습니다.")
+    figs = "".join(gallery_figure(i, _gallery_alt(region, i)) for i in idxs)
+    return f"""<section class="section" aria-labelledby="gallery">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Gallery</span>
+      <h2 id="gallery">{title}</h2>
+      <p class="lead">{lead}</p>
+    </div>
+    <div class="gallery-grid">{figs}</div>
+  </div>
+</section>
+"""
+
+def _gallery_idxs(seed, count, total):
+    start = int(_hl.md5(str(seed).encode("utf-8")).hexdigest(), 16) % total
+    return [((start + i) % total) + 1 for i in range(count)]
+
+def gallery_block(region, seed, n=6):
+    """프로즈(본문) 컬럼 안에 들어가는 지역 갤러리 — section/container 래퍼 없음."""
+    idxs = _gallery_idxs(seed, n, GALLERY_COUNT)
+    figs = "".join(gallery_figure(i, _gallery_alt(region, i)) for i in idxs)
+    return (f'\n      <h2 id="gallery">{region} 시공 갤러리</h2>\n'
+            f'      <p>{region} 인근 현장에서 진행한 하수구막힘·누수탐지·수전교체·배수구뚫음·고압세척 '
+            f'작업 사진입니다.</p>\n'
+            f'      <div class="gallery-grid">{figs}</div>\n')
 
 # ===========================================================================
 # 전국 행정구역(시도 > 시군구) 공식 데이터 + 로마자 슬러그
@@ -96,7 +154,7 @@ HOME_JSONLD = """<script type="application/ld+json">
   "image": "%(s)s/assets/logo/symbol.png",
   "logo": "%(s)s/assets/logo/logo-horizontal-dark.png",
   "url": "%(s)s/",
-  "telephone": "+82-0000-0000",
+  "telephone": "+82-10-5183-4300",
   "priceRange": "\\u20a9\\u20a9",
   "openingHoursSpecification": {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"00:00","closes":"23:59"},
   "areaServed": {"@type":"Country","name":"대한민국"},
@@ -143,22 +201,22 @@ def faq_html(items, intro=True):
 HERO = """<section class="hero hero--media">
   <div class="container hero-inner">
     <div class="hero-text">
-    <span class="badge badge--light"><span class="dot"></span>가정집 · 음식점 · 빌딩 배관 전문</span>
-    <h1>막힘부터 누수까지 <span class="accent">배관 문제</span>,<br>정확하게 뿌리뽑습니다.</h1>
-    <p class="hero-sub">하수구막힘·배관공사·누수탐지·고압세척 — 가정집과 상업시설 모두, 증상을 확인하고 원인부터 해결하는 스피드 배관공사. 현장 방문 전 전화 상담으로 예상 비용을 먼저 안내드립니다.</p>
+    <span class="badge badge--light"><span class="dot"></span>24시 긴급출동 · 연중무휴 · 가정집 · 음식점 · 빌딩 배관 전문</span>
+    <h1>막힘부터 누수까지 <span class="accent">배관 문제</span>,<br>24시간 긴급출동으로 뿌리뽑습니다.</h1>
+    <p class="hero-sub">하수구막힘·배관공사·누수탐지·고압세척 — 가정집과 상업시설 모두, 증상을 확인하고 원인부터 해결하는 스피드 배관공사. 야간·새벽·공휴일도 쉬지 않는 연중무휴 24시간 긴급출동 업체로, 접수 즉시 가장 가까운 작업팀이 움직입니다. 현장 방문 전 전화 상담으로 예상 비용을 먼저 안내드립니다.</p>
     <div class="hero-cta">
-      <a class="btn btn--primary btn--lg" href="tel:0000-0000">
+      <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"/></svg>
-        지금 전화 0000-0000</a>
+        지금 전화 010-5183-4300</a>
       <a class="btn btn--ghost-light btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">광고문의 상담</a>
     </div>
     <div class="hero-trust">
-      <span class="badge badge--light">⏱ 당일·야간 출동 가능</span>
+      <span class="badge badge--light">⏱ 24시 긴급출동 · 연중무휴</span>
       <span class="badge badge--light">✓ 전화 상담 후 예상 비용 안내</span>
       <span class="badge badge--light">★ 작업 후 보증 제공</span>
     </div>
     <div class="hero-keywords" aria-hidden="true">
-      <span>#하수구막힘</span><span>#배관공사</span><span>#누수탐지</span><span>#고압세척</span><span>#싱크대막힘</span><span>#CCTV관로검사</span>
+      <span>#하수구막힘</span><span>#배관막힘</span><span>#누수탐지</span><span>#누수공사</span><span>#수전교체</span><span>#변기막힘</span><span>#변기교체</span><span>#세면대교체</span><span>#배수구뚫음</span><span>#수도누수</span><span>#배관내시경</span><span>#고압세척</span>
     </div>
     </div>
     <div class="hero-media">
@@ -182,7 +240,7 @@ TRUST = """<section class="section section--off" aria-labelledby="trust-h">
       <p class="lead">막힘 하나가 영업을 멈추고, 누수 하나가 아랫집 분쟁으로 번집니다. 원인을 정확히 찾고, 재발까지 관리합니다.</p>
     </div>
     <div class="trust-grid">
-      <div class="trust-card"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div><h3>당일·야간 출동</h3><p>낮이든 새벽이든 접수 즉시 현장과 가장 가까운 작업팀을 연결합니다.</p></div>
+      <div class="trust-card"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div><h3>24시 긴급출동</h3><p>낮이든 새벽이든, 주말·공휴일에도 쉬지 않습니다. 연중무휴 24시간 접수 즉시 현장과 가장 가까운 작업팀을 긴급 연결합니다.</p></div>
       <div class="trust-card"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>전화 상담 후 비용 안내</h3><p>증상을 먼저 들은 뒤 예상 범위를 안내합니다. 현장에서 확정된 견적 외 추가 청구는 없습니다.</p></div>
       <div class="trust-card"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></div><h3>근본 원인 처리</h3><p>일시 뚫음에 그치지 않고 반복 원인을 파악해 재발을 최소화합니다.</p></div>
       <div class="trust-card"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></div><h3>전국 출동 가능</h3><p>전국 시·도 작업 네트워크로 주요 도심은 물론 인근 시·군·구까지 연결됩니다.</p></div>
@@ -196,17 +254,17 @@ SERVICE_GRID = """<section class="section" aria-labelledby="svc-h">
     <div class="section-head center">
       <span class="eyebrow">Services</span>
       <h2 id="svc-h">어떤 배관 문제든 해결합니다</h2>
-      <p class="lead">가정집부터 식당·빌딩까지, 현장 조건에 맞는 장비와 방법으로 접근합니다.</p>
+      <p class="lead">하수구막힘·배관막힘부터 누수탐지·누수공사, 수전교체·변기교체·세면대교체, 배수구뚫음·고압세척까지 — 가정집부터 식당·빌딩까지 현장 조건에 맞는 장비와 방법으로 접근합니다.</p>
     </div>
     <div class="service-grid">
       <a class="service-card" href="/service/sewer-clog.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18"/><path d="M6 7v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7"/><path d="M9 11v3M15 11v3"/></svg></div><h3>하수구막힘</h3><p>역류·악취·배수 지연 — 막힘 위치와 원인을 먼저 파악합니다.</p><span class="more">자세히 →</span></a>
       <a class="service-card" href="/service/plumbing.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h7v4H4z"/><path d="M11 9h5a3 3 0 0 1 3 3v8"/><path d="M16 20h6"/></svg></div><h3>배관공사</h3><p>노후관 교체·신설·증설 — 영업 중단 최소화 시공.</p><span class="more">자세히 →</span></a>
-      <a class="service-card" href="/service/leak-detection.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></div><h3>누수탐지</h3><p>벽·바닥 철거 없이 청음·열화상으로 위치 특정.</p><span class="more">자세히 →</span></a>
+      <a class="service-card" href="/service/leak-detection.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></div><h3>누수탐지·누수공사</h3><p>수도누수·욕실/주방 배관누수·물샘 — 벽·바닥 철거 없이 청음·열화상으로 위치 특정 후 최소 시공.</p><span class="more">자세히 →</span></a>
       <a class="service-card" href="/service/high-pressure.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h6"/><path d="M9 9l4 3-4 3z"/><path d="M14 7v10M18 5v14"/></svg></div><h3>고압세척</h3><p>기름때·스케일을 고압수로 제거해 배수 흐름 회복.</p><span class="more">자세히 →</span></a>
       <a class="service-card" href="/service/cctv.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg></div><h3>CCTV 관로검사</h3><p>카메라로 배관 내부를 직접 확인해 원인 특정.</p><span class="more">자세히 →</span></a>
-      <a class="service-card" href="/service/sewer-clog.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="9" rx="2"/><path d="M9 11v9a3 3 0 0 0 6 0v-9"/></svg></div><h3>변기·싱크대막힘</h3><p>이물질 제거·압력 관통으로 즉시 배수 복구.</p><span class="more">자세히 →</span></a>
+      <a class="service-card" href="/service/sewer-clog.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="9" rx="2"/><path d="M9 11v9a3 3 0 0 0 6 0v-9"/></svg></div><h3>변기·싱크대·세면대막힘</h3><p>변기막힘·싱크대하수구막힘·세면대막힘·배수구뚫음 — 이물질제거·압력 관통으로 즉시 배수 복구.</p><span class="more">자세히 →</span></a>
       <a class="service-card" href="/service/plumbing.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6"/><path d="M5 8h14l-1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/></svg></div><h3>정화조·동파</h3><p>정화조 준설·청소 및 동파된 배관 복구.</p><span class="more">자세히 →</span></a>
-      <a class="service-card" href="/service/plumbing.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 7l3 3"/><path d="M3 21l3-1 11-11-2-2L4 18z"/><path d="M17 4l3 3"/></svg></div><h3>배관 리모델링</h3><p>상가·사무실 인테리어 배관 재배치·경로 변경.</p><span class="more">자세히 →</span></a>
+      <a class="service-card" href="/service/plumbing.html"><div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 7l3 3"/><path d="M3 21l3-1 11-11-2-2L4 18z"/><path d="M17 4l3 3"/></svg></div><h3>수전·변기·설비 교체</h3><p>수전교체·싱크대/화장실 수전교체, 세면대교체, 변기교체·변기부속품수리 등 배관설비·수도수리.</p><span class="more">자세히 →</span></a>
     </div>
   </div>
 </section>
@@ -343,7 +401,8 @@ NAVER_SECTION = f"""<section class="section" aria-labelledby="naver-h">
 """
 
 HOME_BODY = ("<main>\n" + HERO + TRUST_RIBBON + TRUST + SERVICE_GRID + AREA_BLOCK + STEPS +
-             PRICE_PREVIEW + case_grid() + REVIEWS + NAVER_SECTION + HOME_FAQ + bottom_cta() + "</main>\n")
+             PRICE_PREVIEW + case_grid() + gallery_section() + REVIEWS + NAVER_SECTION +
+             HOME_FAQ + bottom_cta() + "</main>\n")
 
 page("index.html",
      "스피드 배관공사 | 하수구막힘·누수탐지·배관공사 전문",
@@ -686,9 +745,9 @@ def sido_page(slug, name, short, intro, districts, district_links, cases_html, p
     <aside class="sidebar-card">
       <h3>{name} 상담</h3>
       <p>{phone_note}</p>
-      <a class="phone-big" href="tel:0000-0000">0000-0000</a>
+      <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
       <p style="margin-bottom:18px;">카카오톡 상담 @스피드배관</p>
-      <a class="btn btn--primary btn--block" href="tel:0000-0000">☎ 전화 상담</a>
+      <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 전화 상담</a>
       <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener" style="margin-top:10px;">광고문의 상담</a>
     </aside>
   </div>
@@ -895,7 +954,7 @@ about_body = f"""{phero("About","회사소개","상업시설 배관, 멈추지 �
         <tr><td>대표자</td><td colspan="2">(미정)</td></tr>
         <tr><td>사업자등록번호</td><td colspan="2">000-00-00000</td></tr>
         <tr><td>주소</td><td colspan="2">(미정)</td></tr>
-        <tr><td>대표전화</td><td colspan="2">0000-0000</td></tr>
+        <tr><td>대표전화</td><td colspan="2">010-5183-4300</td></tr>
         <tr><td>카카오톡</td><td colspan="2">@스피드배관</td></tr>
         <tr><td>영업시간</td><td colspan="2">연중무휴 24시간</td></tr>
       </tbody>
@@ -948,12 +1007,12 @@ contact_body = f"""{phero("Contact","상담문의","전화 한 통이면 가장 
     <aside class="sidebar-card">
       <h3>바로 연락하기</h3>
       <p>24시간 상업시설 전문 출동. 급하실 땐 전화가 가장 빠릅니다.</p>
-      <a class="phone-big" href="tel:0000-0000">0000-0000</a>
+      <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
       <ul class="info-list" style="margin-top:18px;color:#BFD0E8;list-style:none;">
         <li style="display:block;color:#BFD0E8;">카카오톡 상담: <strong style="color:#fff;">@스피드배관</strong></li>
         <li style="display:block;color:#BFD0E8;">영업시간: <strong style="color:#fff;">연중무휴 24시간</strong></li>
       </ul>
-      <a class="btn btn--primary btn--block" href="tel:0000-0000" style="margin-top:16px;">☎ 전화 상담</a>
+      <a class="btn btn--primary btn--block" href="tel:010-5183-4300" style="margin-top:16px;">☎ 전화 상담</a>
       <a class="btn btn--ghost-light btn--block" href="https://pf.kakao.com/" target="_blank" rel="noopener" style="margin-top:10px;">카카오톡 상담</a>
     </aside>
   </div>
@@ -1002,7 +1061,7 @@ def legal_page(slug, title_h1, eyebrow, intro, sections, seo_title, seo_desc):
     <p class="price-note">※ 본 문서는 표준 양식 기반의 예시이며, 사업자 정보 확정 후 실제 내용으로 교체됩니다.</p>
     {secs}
     <h2>문의처</h2>
-    <p>개인정보 및 약관 관련 문의는 대표전화(0000-0000) 또는 카카오톡 상담(@스피드배관)으로 연락 주시기 바랍니다.</p>
+    <p>개인정보 및 약관 관련 문의는 대표전화(010-5183-4300) 또는 카카오톡 상담(@스피드배관)으로 연락 주시기 바랍니다.</p>
   </div>
 </section>
 </main>
@@ -1174,9 +1233,9 @@ def gungu_page(sido_slug, sido_name, sido_url, slug, gu_name, lead, paras, jobs,
     <aside class="sidebar-card">
       <h3>{gu_name} 상담</h3>
       <p>{note}</p>
-      <a class="phone-big" href="tel:0000-0000">0000-0000</a>
+      <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
       <p style="margin-bottom:18px;">카카오톡 상담 @스피드배관</p>
-      <a class="btn btn--primary btn--block" href="tel:0000-0000">☎ 전화 상담</a>
+      <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 전화 상담</a>
       <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener" style="margin-top:10px;">광고문의 상담</a>
     </aside>
   </div>
@@ -1288,8 +1347,11 @@ SYMPTOM_LI = ("<li>물이 평소보다 천천히 빠지는 경우</li>"
               "<li>변기가 반복적으로 막히는 경우</li>"
               "<li>음식점 주방 배관에 기름때가 쌓인 경우</li>"
               "<li>오래된 건물의 배관 구배가 좋지 않은 경우</li>")
-SERVICE_LI = ("<li>하수구막힘</li><li>배관공사</li><li>싱크대막힘</li><li>변기막힘</li>"
-              "<li>욕실 배수구막힘</li><li>세면대막힘</li><li>오수관막힘</li><li>배관내시경</li>"
+SERVICE_LI = ("<li>하수구막힘·배관막힘</li><li>싱크대하수구막힘</li><li>변기막힘·화장실 변기교체</li>"
+              "<li>세면대막힘·세면대교체</li><li>배수구막힘·배수구뚫음</li><li>주방배수구막힘</li>"
+              "<li>누수탐지·누수공사</li><li>욕실배관누수·주방배관누수</li><li>수도누수·물샘 잡기</li>"
+              "<li>수전교체(싱크대·화장실 수전교체)</li><li>변기부속품수리·배관부품 교체</li>"
+              "<li>배관설비·수도수리</li><li>배관내시경 검사·이물질제거</li><li>역류·악취 처리</li>"
               "<li>고압세척</li><li>음식점 하수구막힘</li><li>상가 배관공사</li><li>아파트·빌라 배관보수</li>")
 WORK_LI = ("<li>증상 확인 및 사진·영상 상담</li><li>막힘 위치 추정 및 현장 접근 여부 확인</li>"
            "<li>작업 전 비용 기준 안내</li><li>장비 선택(스프링·관통·고압세척 등)</li>"
@@ -1356,14 +1418,48 @@ SYMPTOM_TAIL_V = [
     "같은 증상이라도 주거지인지 영업장인지에 따라 원인이 다릅니다. 단순 이물질이면 관통으로 해결되지만, 반복된다면 배관 내부 상태를 확인해보는 것이 좋습니다.",
     "건물 연식과 용도에 따라 막힘의 원인이 달라집니다. 일시적 이물질일 수도 있지만, 자주 반복된다면 내부 퇴적이나 구배 문제를 의심해볼 수 있습니다.",
 ]
+# 누수(누수탐지·누수공사·물샘) 변형 — 전 지역 페이지 공통, 중복도 완화
+LEAK_V = [
+    ("물이 새는 곳을 눈으로 찾기 어려운 벽·바닥·천장 누수는 청음·열화상으로 위치를 특정하는 누수탐지가 먼저입니다. "
+     "욕실배관누수·주방배관누수처럼 배관 연결부에서 시작된 물샘은 원인 지점을 정확히 찾아야 최소 철거로 누수공사를 끝낼 수 있습니다. "
+     "수도누수로 계량기가 계속 돌거나 아랫집으로 물이 번지는 상황은 방치할수록 피해가 커지므로 조기 상담을 권합니다."),
+    ("벽 속·바닥 아래에서 새는 물은 눈에 보이지 않아, 청음·열화상 장비로 위치를 찾는 누수탐지가 핵심입니다. "
+     "욕실·주방 배관누수와 수도누수는 새는 지점만 정확히 잡으면 불필요한 철거 없이 누수공사와 수도수리를 진행할 수 있습니다. "
+     "물샘·곰팡이·수도요금 급증이 보이면 초기에 점검하는 편이 비용을 줄입니다."),
+    ("천장 얼룩, 벽지 들뜸, 원인 모를 물샘은 배관 어딘가의 누수 신호입니다. 누수탐지로 새는 위치를 먼저 특정한 뒤, "
+     "욕실배관누수·주방배관누수·수도누수를 최소 철거로 처리하는 누수공사를 진행합니다. "
+     "수도계량기가 사용하지 않는데도 돌아간다면 숨은 누수를 의심하고 조기 상담하는 것이 안전합니다."),
+]
+# 수전·변기·설비 교체 변형 — 전 지역 페이지 공통, 중복도 완화
+REPLACE_V = [
+    ("오래된 수전에서 물이 새거나 손잡이가 헐거워지면 부속만 손보기보다 수전교체가 깔끔한 경우가 많습니다. "
+     "싱크대수전교체·화장실수전교체, 세면대교체는 물론 화장실변기교체와 변기부속품수리, 헐거운 배관부품 교체까지 함께 처리합니다. "
+     "노후 배관설비는 부분 수리와 교체 중 어느 쪽이 더 경제적인지 상태를 확인한 뒤 안내드립니다."),
+    ("수전에서 물이 계속 떨어지거나 온수·냉수 조절이 안 되면 수전교체가 필요할 수 있습니다. "
+     "싱크대·화장실 수전교체, 세면대교체, 화장실변기교체, 변기부속품수리 같은 설비 교체와 수도수리를 함께 진행하며, "
+     "필요한 배관부품은 현장에서 확인해 교체합니다. 교체가 나은지 수리가 나은지는 노후 정도를 보고 판단합니다."),
+    ("낡은 수전·변기·세면대는 계속 물이 새며 수도요금과 불편을 키웁니다. 싱크대수전교체와 화장실수전교체, 세면대교체, "
+     "변기교체·변기부속품수리, 배관설비 부품 교체까지 한 번의 방문으로 정리할 수 있습니다. "
+     "부분 수도수리로 될지 전체 교체가 나을지는 상태를 확인한 뒤 비용 기준과 함께 안내드립니다."),
+]
+
+def leak_replace_sections(name, seed):
+    """누수(누수탐지·누수공사)와 수전·변기·설비 교체 섹션 — 전 지역 페이지 공통."""
+    leak = vpick(str(seed) + "lk", LEAK_V)
+    repl = vpick(str(seed) + "rp", REPLACE_V)
+    return (f'\n      <h2 id="leak">{name} 누수탐지·누수공사</h2>\n      <p>{leak}</p>\n'
+            f'\n      <h2 id="replace">{name} 수전교체·변기교체·설비 수리</h2>\n      <p>{repl}</p>\n')
+
+LEAK_REPLACE_NAV = ('          <li><a href="#leak">누수탐지·누수공사</a></li>\n'
+                    '          <li><a href="#replace">수전·변기·설비 교체</a></li>\n')
 
 def local_sidebar(title, note):
     return f"""<aside class="sidebar-card">
       <h3>{title}</h3>
       <p>{note}</p>
-      <a class="phone-big" href="tel:0000-0000">0000-0000</a>
+      <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
       <p style="margin-bottom:18px;">증상·위치·건물 형태를 알려주시면 더 정확히 안내드립니다.</p>
-      <a class="btn btn--primary btn--block" href="tel:0000-0000">☎ 전화 상담하기</a>
+      <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 전화 상담하기</a>
       <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener" style="margin-top:10px;">사진 보내기 · 상담</a>
     </aside>"""
 
@@ -1398,6 +1494,9 @@ def build_gangnam_gu():
           <li><a href="#intro">강남 배관공사 안내</a></li>
           <li><a href="#symptom">강남 하수구막힘 증상</a></li>
           <li><a href="#fixtures">싱크대·변기·욕실 배수구 문제</a></li>
+          <li><a href="#leak">누수탐지·누수공사</a></li>
+          <li><a href="#replace">수전·변기·설비 교체</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#inspection">배관내시경·고압세척 작업</a></li>
           <li><a href="#area">강남구 서비스 가능 지역</a></li>
           <li><a href="#cost">비용이 달라지는 기준</a></li>
@@ -1419,7 +1518,8 @@ def build_gangnam_gu():
       <p>주방 싱크대는 음식물과 기름이 함께 흘러가며 배관 안쪽에 퇴적물을 만들고, 변기는 이물질이나 노후 배관 구배 문제로 반복 막힘이 나타납니다. 욕실 바닥 배수구와 세면대는 머리카락·비누때가 주요 원인이며, 배수가 늦어지거나 냄새가 올라오면 내부에 이물질이 쌓였을 가능성이 큽니다. 증상별로 필요한 장비가 다르므로 작업 전 상태 확인이 중요합니다.</p>
       <h3>서비스 가능 항목</h3>
       <ul class="ticks">{SERVICE_LI}</ul>
-
+{leak_replace_sections("강남", "강남구")}
+{gallery_block("강남", "강남구", n=6)}
       <h2 id="inspection">배관내시경·고압세척 작업</h2>
       <p>반복 막힘이나 원인을 알 수 없는 역류·악취는 배관내시경으로 내부를 직접 확인하면 원인 위치를 특정할 수 있습니다. 기름때나 퇴적물이 두껍게 쌓인 경우에는 고압세척으로 관 벽을 세척해야 배수 흐름이 제대로 회복됩니다. 작업은 아래 순서로 진행됩니다.</p>
       <ol style="padding-left:20px;display:flex;flex-direction:column;gap:8px;">{WORK_LI}</ol>
@@ -1455,7 +1555,7 @@ def build_gangnam_gu():
       <h2 id="call">강남 전화 상담</h2>
       <p>강남구 하수구막힘이나 배관공사 상담이 필요하다면 증상, 위치, 건물 형태, 물이 내려가는 속도, 냄새 여부를 알려주세요. 스피드 배관공사는 현장 조건을 먼저 확인하고 필요한 작업 방향을 안내합니다.</p>
       <div class="local-cta">
-        <a class="btn btn--primary btn--lg" href="tel:0000-0000">☎ 전화 상담하기</a>
+        <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 전화 상담하기</a>
         <a class="btn btn--secondary btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">사진 보내기</a>
         <a class="btn btn--secondary btn--lg" href="#cost">비용 기준 보기</a>
         <a class="btn btn--secondary btn--lg" href="/cases.html">강남 현장사례 보기</a>
@@ -1502,7 +1602,10 @@ def build_gangnam_dong(ko, slug, intro1, intro2, problem, adjacency):
           <li><a href="#intro">{ko} 배관공사 안내</a></li>
           <li><a href="#symptom">하수구막힘 증상</a></li>
           <li><a href="#fixtures">싱크대·변기·욕실</a></li>
+          <li><a href="#leak">누수탐지·누수공사</a></li>
+          <li><a href="#replace">수전·변기·설비 교체</a></li>
           <li><a href="#services">서비스 가능 항목</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#work">작업 방식</a></li>
           <li><a href="#inspection">배관내시경·고압세척</a></li>
           <li><a href="#cost">비용 기준</a></li>
@@ -1522,9 +1625,10 @@ def build_gangnam_dong(ko, slug, intro1, intro2, problem, adjacency):
 
       <h2 id="fixtures">{ko} 싱크대·변기·욕실 배수구 문제</h2>
       <p>{FIXTURE_P}</p>
-
+{leak_replace_sections(ko, ko)}
       <h2 id="services">{ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(ko, seed=ko, n=6)}
 
       <h2 id="work">{ko} 작업 방식 안내</h2>
       <p>{ko} 현장도 증상 확인과 사진·영상 상담을 먼저 진행한 뒤, 막힘 위치와 원인을 추정해 필요한 장비를 선택합니다. 작업 전 비용 기준을 안내드리고, 동의 후 막힘 제거 또는 배관 세척을 진행합니다.</p>
@@ -1552,7 +1656,7 @@ def build_gangnam_dong(ko, slug, intro1, intro2, problem, adjacency):
       <h2 id="call">{ko} 전화 상담</h2>
       <p>{ko}에서 하수구막힘이나 배관공사 상담이 필요하다면 증상, 위치, 건물 형태, 물이 내려가는 속도, 냄새 여부를 알려주세요. 현장 조건을 먼저 확인하고 필요한 작업 방향을 안내합니다.</p>
       <div class="local-cta">
-        <a class="btn btn--primary btn--lg" href="tel:0000-0000">☎ 전화 상담하기</a>
+        <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 전화 상담하기</a>
         <a class="btn btn--secondary btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">사진 보내기</a>
         <a class="btn btn--secondary btn--lg" href="/area/seoul/gangnam-gu/">강남구 전체 보기</a>
       </div>
@@ -1612,6 +1716,9 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
           <li><a href="#intro">{gu_ko} 배관공사 안내</a></li>
           <li><a href="#symptom">하수구막힘 증상</a></li>
           <li><a href="#fixtures">싱크대·변기·욕실 배수구</a></li>
+          <li><a href="#leak">누수탐지·누수공사</a></li>
+          <li><a href="#replace">수전·변기·설비 교체</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#inspection">배관내시경·고압세척</a></li>
           <li><a href="#area">{gu_ko} 서비스 가능 지역</a></li>
           <li><a href="#cost">비용 기준</a></li>
@@ -1632,7 +1739,8 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
       <p>{fixt}</p>
       <h3>서비스 가능 항목</h3>
       <ul class="ticks">{SERVICE_LI}</ul>
-
+{leak_replace_sections(gu_ko, gu_ko)}
+{gallery_block(gu_ko, gu_ko, n=6)}
       <h2 id="inspection">배관내시경·고압세척 작업</h2>
       <p>{insp}</p>
       <ol style="padding-left:20px;display:flex;flex-direction:column;gap:8px;">{WORK_LI}</ol>
@@ -1658,7 +1766,7 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
       <h2 id="call">{gu_ko} 전화 상담</h2>
       <p>{gu_ko}에서 하수구막힘이나 배관공사 상담이 필요하다면 증상, 위치, 건물 형태, 물이 내려가는 속도, 냄새 여부를 알려주세요. 스피드 배관공사는 현장 조건을 먼저 확인하고 필요한 작업 방향을 안내합니다.</p>
       <div class="local-cta">
-        <a class="btn btn--primary btn--lg" href="tel:0000-0000">☎ 전화 상담하기</a>
+        <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 전화 상담하기</a>
         <a class="btn btn--secondary btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">사진 보내기</a>
         <a class="btn btn--secondary btn--lg" href="#cost">비용 기준 보기</a>
         <a class="btn btn--secondary btn--lg" href="/cases.html">현장사례 보기</a>
@@ -1703,7 +1811,10 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
           <li><a href="#intro">{ko} 배관공사 안내</a></li>
           <li><a href="#symptom">하수구막힘 증상</a></li>
           <li><a href="#fixtures">싱크대·변기·욕실</a></li>
+          <li><a href="#leak">누수탐지·누수공사</a></li>
+          <li><a href="#replace">수전·변기·설비 교체</a></li>
           <li><a href="#services">서비스 가능 항목</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#work">작업 방식</a></li>
           <li><a href="#inspection">배관내시경·고압세척</a></li>
           <li><a href="#cost">비용 기준</a></li>
@@ -1723,9 +1834,10 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
 
       <h2 id="fixtures">{ko} 싱크대·변기·욕실 배수구 문제</h2>
       <p>{FIXTURE_P}</p>
-
+{leak_replace_sections(ko, ko)}
       <h2 id="services">{ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(ko, seed=ko, n=6)}
 
       <h2 id="work">{ko} 작업 방식 안내</h2>
       <p>{ko} 현장도 증상 확인과 사진·영상 상담을 먼저 진행한 뒤, 막힘 위치와 원인을 추정해 필요한 장비를 선택합니다. 작업 전 비용 기준을 안내드리고, 동의 후 막힘 제거 또는 배관 세척을 진행합니다.</p>
@@ -1753,7 +1865,7 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
       <h2 id="call">{ko} 전화 상담</h2>
       <p>{ko}에서 하수구막힘이나 배관공사 상담이 필요하다면 증상, 위치, 건물 형태, 물이 내려가는 속도, 냄새 여부를 알려주세요. 현장 조건을 먼저 확인하고 필요한 작업 방향을 안내합니다.</p>
       <div class="local-cta">
-        <a class="btn btn--primary btn--lg" href="tel:0000-0000">☎ 전화 상담하기</a>
+        <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 전화 상담하기</a>
         <a class="btn btn--secondary btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">사진 보내기</a>
         <a class="btn btn--secondary btn--lg" href="{gu_url}">{gu_ko} 전체 보기</a>
       </div>
@@ -2049,7 +2161,10 @@ def gen_sigungu_page(sido_ko, sido_slug, gu_ko, siblings):
           <li><a href="#intro">{gu_ko} 배관공사 안내</a></li>
           <li><a href="#symptom">하수구막힘 증상</a></li>
           <li><a href="#fixtures">싱크대·변기·욕실</a></li>
+          <li><a href="#leak">누수탐지·누수공사</a></li>
+          <li><a href="#replace">수전·변기·설비 교체</a></li>
           <li><a href="#services">서비스 가능 항목</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#work">작업 방식</a></li>
           <li><a href="#cost">비용 기준</a></li>
           <li><a href="#area">인접 시·군·구</a></li>
@@ -2068,9 +2183,10 @@ def gen_sigungu_page(sido_ko, sido_slug, gu_ko, siblings):
 
       <h2 id="fixtures">{gu_ko} 싱크대·변기·욕실 배수구 문제</h2>
       <p>{FIXTURE_P}</p>
-
+{leak_replace_sections(gu_ko, gu_ko)}
       <h2 id="services">{gu_ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(gu_ko, seed=gu_ko, n=6)}
 
       <h2 id="work">{gu_ko} 작업 방식 안내</h2>
       <p>{gu_ko} 현장도 증상 확인과 사진·영상 상담을 먼저 진행한 뒤, 막힘 위치와 원인을 추정해 필요한 장비를 선택합니다. 작업 전 비용 기준을 안내드리고, 동의 후 막힘 제거 또는 배관 세척을 진행합니다.</p>
@@ -2100,7 +2216,7 @@ def gen_sigungu_page(sido_ko, sido_slug, gu_ko, siblings):
       <h2 id="call">{gu_ko} 전화 상담</h2>
       <p>{gu_ko}에서 하수구막힘이나 배관공사 상담이 필요하다면 증상, 위치, 건물 형태, 물이 내려가는 속도, 냄새 여부를 알려주세요. 현장 조건을 먼저 확인하고 필요한 작업 방향을 안내합니다.</p>
       <div class="local-cta">
-        <a class="btn btn--primary btn--lg" href="tel:0000-0000">☎ 전화 상담하기</a>
+        <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 전화 상담하기</a>
         <a class="btn btn--secondary btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">사진 보내기</a>
         <a class="btn btn--secondary btn--lg" href="{sido_url}">{sido_ko} 전체 보기</a>
       </div>
@@ -2174,9 +2290,10 @@ def gen_dong_page(sido_ko, sido_slug, gu_ko, gu_url, dong_ko, siblings, override
 
       <h2 id="fixtures">{dong_ko} 싱크대·변기·욕실 배수구 문제</h2>
       <p>{fixt}</p>
-
+{leak_replace_sections(dong_ko, dong_ko)}
       <h2 id="services">{dong_ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(dong_ko, seed=dong_ko, n=6)}
 
       <h2 id="work">{dong_ko} 작업 방식 안내</h2>
       <p>{dong_ko} {wintro}</p>
@@ -2202,7 +2319,7 @@ def gen_dong_page(sido_ko, sido_slug, gu_ko, gu_url, dong_ko, siblings, override
       <h2 id="call">{dong_ko} 전화 상담</h2>
       <p>{dong_ko}에서 하수구막힘이나 배관공사 상담이 필요하다면 증상, 위치, 건물 형태, 물이 내려가는 속도, 냄새 여부를 알려주세요. 현장 조건을 먼저 확인하고 필요한 작업 방향을 안내합니다.</p>
       <div class="local-cta">
-        <a class="btn btn--primary btn--lg" href="tel:0000-0000">☎ 전화 상담하기</a>
+        <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 전화 상담하기</a>
         <a class="btn btn--secondary btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">사진 보내기</a>
         <a class="btn btn--secondary btn--lg" href="{gu_url}">{gu_ko} 전체 보기</a>
       </div>
