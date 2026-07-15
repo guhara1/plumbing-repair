@@ -24,7 +24,7 @@ KEYWORDS = ("누수탐지, 누수공사, 하수구막힘, 배관막힘, 배관�
 #   아래 GALLERY_READY = True 로 바꾸고 `python3 pages.py` 재빌드하면
 #   플레이스홀더 박스가 실제 이미지로 일괄 교체됩니다.
 # ---------------------------------------------------------------------------
-GALLERY_READY = False               # 실제 이미지 준비되면 True
+GALLERY_READY = True                # 실제 이미지 준비되면 True (assets/img/gallery/NN.webp)
 GALLERY_DIR = "/assets/img/gallery"
 GALLERY_COUNT = 21
 
@@ -33,10 +33,9 @@ def gallery_figure(n, alt, caption=""):
     nn = f"{int(n):02d}"
     cap = f'<figcaption class="gphoto-cap">{caption}</figcaption>' if caption else ""
     if GALLERY_READY:
-        media = (f'<picture><source srcset="{GALLERY_DIR}/{nn}.webp" type="image/webp">'
-                 f'<img class="gphoto-img" src="{GALLERY_DIR}/{nn}.jpg" alt="{alt}" '
-                 f'loading="lazy" decoding="async" width="800" height="600"></picture>')
-        return f'<figure class="gphoto">{media}{cap}</figure>'
+        media = (f'<img class="gphoto-img" src="{GALLERY_DIR}/{nn}.webp" alt="{alt}" '
+                 f'loading="lazy" decoding="async" width="1000" height="750">')
+        return f'<figure class="gphoto"><a href="{GALLERY_DIR}/{nn}.webp" aria-label="{alt} 크게 보기">{media}</a>{cap}</figure>'
     return (f'<figure class="gphoto is-empty" role="img" aria-label="{alt}" data-slot="{nn}">'
             f'<span class="gphoto-ph"><span class="gphoto-no">{nn}</span>'
             f'<span class="gphoto-tx">시공사진 준비중</span></span>{cap}</figure>')

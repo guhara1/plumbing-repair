@@ -38,7 +38,7 @@ def gallery_section(region="", seed=None, n=None, title=None, lead=None):
         idxs = [((start + i) % total) + 1 for i in range(count)]
     title = title or (f"{region} 시공 갤러리" if region else "시공 갤러리")
     lead = lead or ("실제 현장에서 촬영한 하수구막힘·누수탐지·수전교체·배수구뚫음·고압세척 작업 사진입니다. "
-                    "이미지를 준비하는 대로 순차 업로드됩니다.")
+                    "누적된 시공 사진을 모았습니다.")
     figs = "".join(gallery_figure(i, _gallery_alt(region, i)) for i in idxs)
     return f"""<section class="section" aria-labelledby="gallery">
   <div class="container">
@@ -62,7 +62,7 @@ def gallery_block(region, seed, n=6):
     figs = "".join(gallery_figure(i, _gallery_alt(region, i)) for i in idxs)
     return (f'\n      <h2 id="gallery">{region} 시공 갤러리</h2>\n'
             f'      <p>{region} 인근 현장에서 진행한 하수구막힘·누수탐지·수전교체·배수구뚫음·고압세척 '
-            f'작업 사진입니다. 이미지는 준비되는 대로 순차 업로드됩니다.</p>\n'
+            f'작업 사진입니다.</p>\n'
             f'      <div class="gallery-grid">{figs}</div>\n')
 
 # ===========================================================================
