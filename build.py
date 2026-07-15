@@ -140,7 +140,9 @@ HEADER = """<header class="site-header" id="top">
       </ul>
       <div class="mobile-only-cta">
         <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 010-5183-4300 전화상담</a>
+        <!-- 광고문의 상담(모바일 메뉴) 주석처리 — 요청에 따라 미노출
         <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener">광고문의 상담</a>
+        -->
       </div>
     </nav>
     <div class="header-actions">
@@ -148,7 +150,9 @@ HEADER = """<header class="site-header" id="top">
         <small>24시 긴급출동 · 연중무휴</small>
         <strong>010-5183-4300</strong>
       </a>
+      <!-- 광고문의(헤더 버튼) 주석처리 — 요청에 따라 미노출:
       <a class="btn btn--primary header-cta" href="https://t.me/googleseolab" target="_blank" rel="noopener">광고문의</a>
+      -->
       <button class="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="gnb"><span></span></button>
     </div>
   </div>
@@ -216,10 +220,12 @@ FOOTER = """<footer class="site-footer">
       <a class="kakao" href="%(kakao)s" target="_blank" rel="noopener"><span class="nv">K</span>카카오톡 채널</a>
     </nav>
 
+    <!-- 광고주 모집 배너(footer-adbar) 주석처리 — 요청에 따라 미노출:
     <div class="footer-adbar">
       <span class="footer-adbar-txt">📣 이 자리에 귀사 광고를 노출하세요 — 지역별 상위 노출 <strong>광고주 모집 중</strong></span>
       <a class="footer-ad-btn" href="https://t.me/googleseolab" target="_blank" rel="noopener">광고문의 (텔레그램)</a>
     </div>
+    -->
 
     <address class="footer-biz">
       <div class="biz-name"><strong>스피드 배관공사</strong> (SPEED PLUMBING)</div>
@@ -244,7 +250,9 @@ FOOTER = FOOTER % {"place": NAVER_PLACE, "blog": NAVER_BLOG, "talk": NAVER_TALK,
 MOBILE_BAR = """<nav class="mobile-bar" aria-label="빠른 연락">
   <a href="tel:010-5183-4300"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"/></svg>전화</a>
   <a href="https://pf.kakao.com/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>카톡</a>
+  <!-- 광고문의(모바일 하단바) 주석처리 — 요청에 따라 미노출
   <a class="is-primary" href="https://t.me/googleseolab" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>광고문의</a>
+  -->
 </nav>
 """
 
@@ -279,7 +287,8 @@ def clip_desc(s, n=80):
 def page(path, title, desc, canonical, body, jsonld="", og_title=None, og_desc=None, noindex=False):
     robots = "noindex, follow" if noindex else "index, follow"
     desc = clip_desc(desc)          # 네이버 권장: 설명 80자 이내 보장
-    html = head(title, desc, canonical, jsonld, og_title, og_desc, robots) + HEADER + body + FOOTER + MOBILE_BAR + AD_POPUP + SCRIPTS
+    # 광고주 모집 팝업(AD_POPUP) 비활성화 — 요청에 따라 주석처리(미노출).
+    html = head(title, desc, canonical, jsonld, og_title, og_desc, robots) + HEADER + body + FOOTER + MOBILE_BAR + SCRIPTS  # + AD_POPUP
     full = os.path.join(ROOT, path)
     os.makedirs(os.path.dirname(full), exist_ok=True)
     with open(full, "w", encoding="utf-8") as f:
@@ -336,7 +345,9 @@ SIDEBAR = """<aside class="sidebar-card">
   <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
   <p style="margin-bottom:18px;">카카오톡 상담 @스피드배관</p>
   <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 전화 상담</a>
+  <!-- 광고문의 상담(사이드바) 주석처리 — 요청에 따라 미노출:
   <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener" style="margin-top:10px;">광고문의 상담</a>
+  -->
 </aside>
 """
 
@@ -349,7 +360,9 @@ def bottom_cta(h2="배관 문제, 24시 긴급출동으로 바로 해결합니�
       <div><h2>{h2}</h2><p>{p}</p></div>
       <div class="hero-cta">
         <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">☎ 010-5183-4300</a>
+        <!-- 광고문의 상담(하단 CTA) 주석처리 — 요청에 따라 미노출:
         <a class="btn btn--ghost-light btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">광고문의 상담</a>
+        -->
       </div>
     </div></div>
   </div>

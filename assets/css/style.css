@@ -440,7 +440,7 @@ table.price-table{width:100%;border-collapse:collapse;min-width:520px;}
   display:none;position:fixed;left:0;right:0;bottom:0;z-index:90;
   background:#fff;border-top:1px solid var(--line);
   box-shadow:0 -6px 20px rgba(11,37,69,.1);
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
   padding-bottom:env(safe-area-inset-bottom);
 }
 .mobile-bar a{
