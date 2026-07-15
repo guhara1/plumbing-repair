@@ -839,6 +839,10 @@ body{ background:#E7ECF5; }
 /* =========================================================================
    ✦ 푸터 광고문의 CTA (골드 컬러 + 텔레그램)
    ========================================================================= */
+.footer-keywords{margin:14px 0 4px;padding:16px 0 4px;border-top:1px solid rgba(255,255,255,.08);}
+.footer-keywords h4{color:#AFC1DB;font-size:13px;font-weight:800;letter-spacing:.02em;margin-bottom:8px;}
+.footer-keywords .fk-tags{color:#8FA4C2;font-size:12.5px;line-height:1.9;word-break:keep-all;}
+.footer-keywords .fk-desc{color:#7C90AE;font-size:12.5px;line-height:1.7;margin-top:8px;}
 .footer-adbar{
   margin:8px 0 4px;padding:18px 22px;border-radius:16px;
   background:linear-gradient(135deg, rgba(201,162,75,.16), rgba(42,125,225,.10));
