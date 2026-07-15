@@ -208,7 +208,9 @@ HERO = """<section class="hero hero--media">
       <a class="btn btn--primary btn--lg" href="tel:010-5183-4300">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"/></svg>
         지금 전화 010-5183-4300</a>
+      <!-- 광고문의 상담(히어로) 주석처리 — 요청에 따라 미노출:
       <a class="btn btn--ghost-light btn--lg" href="https://t.me/googleseolab" target="_blank" rel="noopener">광고문의 상담</a>
+      -->
     </div>
     <div class="hero-trust">
       <span class="badge badge--light">⏱ 24시 긴급출동 · 연중무휴</span>
@@ -748,7 +750,9 @@ def sido_page(slug, name, short, intro, districts, district_links, cases_html, p
       <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
       <p style="margin-bottom:18px;">카카오톡 상담 @스피드배관</p>
       <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 전화 상담</a>
+      <!-- 광고문의 상담(사이드바) 주석처리 — 요청에 따라 미노출:
       <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener" style="margin-top:10px;">광고문의 상담</a>
+      -->
     </aside>
   </div>
 </section>
@@ -976,7 +980,7 @@ contact_body = f"""{phero("Contact","상담문의","전화 한 통이면 가장 
 <section class="section">
   <div class="container layout-sidebar">
     <div>
-      <h2>광고문의 상담</h2>
+      <h2>상담·견적 문의</h2>
       <p class="lead" style="margin-bottom:24px;">아래 정보를 남겨주시면 빠르게 연락드려 현장 진단·견적을 안내해 드립니다.</p>
       <form data-quote-form novalidate>
         <div class="form-grid">
@@ -1236,7 +1240,9 @@ def gungu_page(sido_slug, sido_name, sido_url, slug, gu_name, lead, paras, jobs,
       <a class="phone-big" href="tel:010-5183-4300">010-5183-4300</a>
       <p style="margin-bottom:18px;">카카오톡 상담 @스피드배관</p>
       <a class="btn btn--primary btn--block" href="tel:010-5183-4300">☎ 전화 상담</a>
+      <!-- 광고문의 상담(사이드바) 주석처리 — 요청에 따라 미노출:
       <a class="btn btn--ghost-light btn--block" href="https://t.me/googleseolab" target="_blank" rel="noopener" style="margin-top:10px;">광고문의 상담</a>
+      -->
     </aside>
   </div>
 </section>
