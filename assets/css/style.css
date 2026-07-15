@@ -340,6 +340,31 @@ table.price-table{width:100%;border-collapse:collapse;min-width:520px;}
 .case-card h3{font-size:17px;margin:6px 0 4px;}
 .case-card p{margin:0;font-size:14px;color:var(--slate);}
 
+/* ── 시공 갤러리 (21장, 준비 전 플레이스홀더 박스) ───────────────── */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:8px;}
+.prose .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+.gphoto{margin:0;border-radius:var(--r-card);overflow:hidden;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);}
+.gphoto .gphoto-img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;}
+.gphoto-cap{padding:8px 10px;font-size:12px;color:var(--slate);}
+/* 이미지 준비 전 플레이스홀더 */
+.gphoto.is-empty{
+  display:flex;align-items:center;justify-content:center;
+  aspect-ratio:4/3;
+  background:
+    repeating-linear-gradient(135deg,rgba(201,162,75,.06) 0 12px,rgba(201,162,75,0) 12px 24px),
+    var(--off);
+  border:1.5px dashed var(--line);box-shadow:none;
+}
+.gphoto.is-empty .gphoto-ph{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--slate);}
+.gphoto.is-empty .gphoto-no{
+  font-family:"Big Shoulders Display",var(--sans,sans-serif);
+  font-weight:900;font-size:26px;line-height:1;color:var(--brass);
+}
+.gphoto.is-empty .gphoto-tx{font-size:11px;font-weight:700;letter-spacing:.04em;}
+@media (max-width:640px){
+  .gallery-grid,.prose .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+}
+
 /* =========================================================
    14. 후기
    ========================================================= */

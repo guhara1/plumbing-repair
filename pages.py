@@ -2,10 +2,68 @@
 # -*- coding: utf-8 -*-
 """모든 페이지 콘텐츠 정의 후 빌드. 사용: python3 pages.py"""
 from build import (page, SITE, breadcrumb_jsonld, SIDEBAR, bottom_cta,
-                   NAVER_PLACE, NAVER_BLOG, NAVER_TALK, KAKAO_CH)
-import json as _json, os as _os
+                   NAVER_PLACE, NAVER_BLOG, NAVER_TALK, KAKAO_CH,
+                   gallery_figure, GALLERY_COUNT)
+import json as _json, os as _os, hashlib as _hl
 
 S = SITE
+
+# ===========================================================================
+# 시공 갤러리 섹션 — 메인 21장 전체 / 지역 페이지 6장 순환(지역명 시드)
+#   실제 이미지는 build.py 의 GALLERY_READY 를 True 로 바꾸면 일괄 반영
+# ===========================================================================
+_GALLERY_WORKS = [
+    "하수구막힘 관통 작업", "고압세척 배수관 세척", "누수탐지 현장", "수전교체 시공",
+    "변기막힘 해결 작업", "세면대 교체 시공", "배수구뚫음 작업", "배관 누수공사",
+    "배관내시경 관로검사", "싱크대하수구막힘 처리", "욕실배관누수 보수", "주방배수구막힘 세척",
+    "화장실 변기교체", "변기부속품수리", "수도누수 잡기", "배관설비 교체",
+    "상가·음식점 배관공사", "정화조·오수관 준설", "이물질제거 작업", "배관 이음부 수리",
+    "수도수리·물샘 보수",
+]
+
+def _gallery_alt(region, n):
+    work = _GALLERY_WORKS[(int(n) - 1) % len(_GALLERY_WORKS)]
+    pre = f"{region} " if region else ""
+    return f"{pre}스피드 배관공사 시공사진 — {work}"
+
+def gallery_section(region="", seed=None, n=None, title=None, lead=None):
+    """시공 갤러리 섹션. region 없으면(메인) 21장 전체, 지역 페이지는 seed 기반 순환 선택."""
+    total = GALLERY_COUNT
+    if seed is None:                       # 메인 — 전체 노출
+        count = n or total
+        idxs = list(range(1, count + 1))
+    else:                                  # 지역 — 21장 중 일부를 시드로 회전 선택
+        count = n or 6
+        start = int(_hl.md5(str(seed).encode("utf-8")).hexdigest(), 16) % total
+        idxs = [((start + i) % total) + 1 for i in range(count)]
+    title = title or (f"{region} 시공 갤러리" if region else "시공 갤러리")
+    lead = lead or ("실제 현장에서 촬영한 하수구막힘·누수탐지·수전교체·배수구뚫음·고압세척 작업 사진입니다. "
+                    "이미지를 준비하는 대로 순차 업로드됩니다.")
+    figs = "".join(gallery_figure(i, _gallery_alt(region, i)) for i in idxs)
+    return f"""<section class="section" aria-labelledby="gallery">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Gallery</span>
+      <h2 id="gallery">{title}</h2>
+      <p class="lead">{lead}</p>
+    </div>
+    <div class="gallery-grid">{figs}</div>
+  </div>
+</section>
+"""
+
+def _gallery_idxs(seed, count, total):
+    start = int(_hl.md5(str(seed).encode("utf-8")).hexdigest(), 16) % total
+    return [((start + i) % total) + 1 for i in range(count)]
+
+def gallery_block(region, seed, n=6):
+    """프로즈(본문) 컬럼 안에 들어가는 지역 갤러리 — section/container 래퍼 없음."""
+    idxs = _gallery_idxs(seed, n, GALLERY_COUNT)
+    figs = "".join(gallery_figure(i, _gallery_alt(region, i)) for i in idxs)
+    return (f'\n      <h2 id="gallery">{region} 시공 갤러리</h2>\n'
+            f'      <p>{region} 인근 현장에서 진행한 하수구막힘·누수탐지·수전교체·배수구뚫음·고압세척 '
+            f'작업 사진입니다. 이미지는 준비되는 대로 순차 업로드됩니다.</p>\n'
+            f'      <div class="gallery-grid">{figs}</div>\n')
 
 # ===========================================================================
 # 전국 행정구역(시도 > 시군구) 공식 데이터 + 로마자 슬러그
@@ -343,7 +401,8 @@ NAVER_SECTION = f"""<section class="section" aria-labelledby="naver-h">
 """
 
 HOME_BODY = ("<main>\n" + HERO + TRUST_RIBBON + TRUST + SERVICE_GRID + AREA_BLOCK + STEPS +
-             PRICE_PREVIEW + case_grid() + REVIEWS + NAVER_SECTION + HOME_FAQ + bottom_cta() + "</main>\n")
+             PRICE_PREVIEW + case_grid() + gallery_section() + REVIEWS + NAVER_SECTION +
+             HOME_FAQ + bottom_cta() + "</main>\n")
 
 page("index.html",
      "스피드 배관공사 | 하수구막힘·누수탐지·배관공사 전문",
@@ -1437,6 +1496,7 @@ def build_gangnam_gu():
           <li><a href="#fixtures">싱크대·변기·욕실 배수구 문제</a></li>
           <li><a href="#leak">누수탐지·누수공사</a></li>
           <li><a href="#replace">수전·변기·설비 교체</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#inspection">배관내시경·고압세척 작업</a></li>
           <li><a href="#area">강남구 서비스 가능 지역</a></li>
           <li><a href="#cost">비용이 달라지는 기준</a></li>
@@ -1459,6 +1519,7 @@ def build_gangnam_gu():
       <h3>서비스 가능 항목</h3>
       <ul class="ticks">{SERVICE_LI}</ul>
 {leak_replace_sections("강남", "강남구")}
+{gallery_block("강남", "강남구", n=6)}
       <h2 id="inspection">배관내시경·고압세척 작업</h2>
       <p>반복 막힘이나 원인을 알 수 없는 역류·악취는 배관내시경으로 내부를 직접 확인하면 원인 위치를 특정할 수 있습니다. 기름때나 퇴적물이 두껍게 쌓인 경우에는 고압세척으로 관 벽을 세척해야 배수 흐름이 제대로 회복됩니다. 작업은 아래 순서로 진행됩니다.</p>
       <ol style="padding-left:20px;display:flex;flex-direction:column;gap:8px;">{WORK_LI}</ol>
@@ -1544,6 +1605,7 @@ def build_gangnam_dong(ko, slug, intro1, intro2, problem, adjacency):
           <li><a href="#leak">누수탐지·누수공사</a></li>
           <li><a href="#replace">수전·변기·설비 교체</a></li>
           <li><a href="#services">서비스 가능 항목</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#work">작업 방식</a></li>
           <li><a href="#inspection">배관내시경·고압세척</a></li>
           <li><a href="#cost">비용 기준</a></li>
@@ -1566,6 +1628,7 @@ def build_gangnam_dong(ko, slug, intro1, intro2, problem, adjacency):
 {leak_replace_sections(ko, ko)}
       <h2 id="services">{ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(ko, seed=ko, n=6)}
 
       <h2 id="work">{ko} 작업 방식 안내</h2>
       <p>{ko} 현장도 증상 확인과 사진·영상 상담을 먼저 진행한 뒤, 막힘 위치와 원인을 추정해 필요한 장비를 선택합니다. 작업 전 비용 기준을 안내드리고, 동의 후 막힘 제거 또는 배관 세척을 진행합니다.</p>
@@ -1655,6 +1718,7 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
           <li><a href="#fixtures">싱크대·변기·욕실 배수구</a></li>
           <li><a href="#leak">누수탐지·누수공사</a></li>
           <li><a href="#replace">수전·변기·설비 교체</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#inspection">배관내시경·고압세척</a></li>
           <li><a href="#area">{gu_ko} 서비스 가능 지역</a></li>
           <li><a href="#cost">비용 기준</a></li>
@@ -1676,6 +1740,7 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
       <h3>서비스 가능 항목</h3>
       <ul class="ticks">{SERVICE_LI}</ul>
 {leak_replace_sections(gu_ko, gu_ko)}
+{gallery_block(gu_ko, gu_ko, n=6)}
       <h2 id="inspection">배관내시경·고압세척 작업</h2>
       <p>{insp}</p>
       <ol style="padding-left:20px;display:flex;flex-direction:column;gap:8px;">{WORK_LI}</ol>
@@ -1749,6 +1814,7 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
           <li><a href="#leak">누수탐지·누수공사</a></li>
           <li><a href="#replace">수전·변기·설비 교체</a></li>
           <li><a href="#services">서비스 가능 항목</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#work">작업 방식</a></li>
           <li><a href="#inspection">배관내시경·고압세척</a></li>
           <li><a href="#cost">비용 기준</a></li>
@@ -1771,6 +1837,7 @@ def build_gu_system(sido_ko, sido_slug, sido_url, gu_ko, gu_slug, lead, intro_pa
 {leak_replace_sections(ko, ko)}
       <h2 id="services">{ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(ko, seed=ko, n=6)}
 
       <h2 id="work">{ko} 작업 방식 안내</h2>
       <p>{ko} 현장도 증상 확인과 사진·영상 상담을 먼저 진행한 뒤, 막힘 위치와 원인을 추정해 필요한 장비를 선택합니다. 작업 전 비용 기준을 안내드리고, 동의 후 막힘 제거 또는 배관 세척을 진행합니다.</p>
@@ -2097,6 +2164,7 @@ def gen_sigungu_page(sido_ko, sido_slug, gu_ko, siblings):
           <li><a href="#leak">누수탐지·누수공사</a></li>
           <li><a href="#replace">수전·변기·설비 교체</a></li>
           <li><a href="#services">서비스 가능 항목</a></li>
+          <li><a href="#gallery">시공 갤러리</a></li>
           <li><a href="#work">작업 방식</a></li>
           <li><a href="#cost">비용 기준</a></li>
           <li><a href="#area">인접 시·군·구</a></li>
@@ -2118,6 +2186,7 @@ def gen_sigungu_page(sido_ko, sido_slug, gu_ko, siblings):
 {leak_replace_sections(gu_ko, gu_ko)}
       <h2 id="services">{gu_ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(gu_ko, seed=gu_ko, n=6)}
 
       <h2 id="work">{gu_ko} 작업 방식 안내</h2>
       <p>{gu_ko} 현장도 증상 확인과 사진·영상 상담을 먼저 진행한 뒤, 막힘 위치와 원인을 추정해 필요한 장비를 선택합니다. 작업 전 비용 기준을 안내드리고, 동의 후 막힘 제거 또는 배관 세척을 진행합니다.</p>
@@ -2224,6 +2293,7 @@ def gen_dong_page(sido_ko, sido_slug, gu_ko, gu_url, dong_ko, siblings, override
 {leak_replace_sections(dong_ko, dong_ko)}
       <h2 id="services">{dong_ko} 서비스 가능 항목</h2>
       <ul class="ticks">{SERVICE_LI}</ul>
+{gallery_block(dong_ko, seed=dong_ko, n=6)}
 
       <h2 id="work">{dong_ko} 작업 방식 안내</h2>
       <p>{dong_ko} {wintro}</p>

@@ -18,6 +18,29 @@ KEYWORDS = ("누수탐지, 누수공사, 하수구막힘, 배관막힘, 배관�
             "주방배관누수, 주방배수구막힘, 이물질제거, 배관내시경, 역류, 물샘, 배관부품, "
             "배관업체, 배관공사, 배관수리비용, 배관수리가격, 고압세척, 24시 긴급출동")
 
+# ---------------------------------------------------------------------------
+# 시공 갤러리 이미지 (21장)
+#   assets/img/gallery/01.jpg … 21.jpg (선택: 같은 이름 .webp) 를 넣은 뒤
+#   아래 GALLERY_READY = True 로 바꾸고 `python3 pages.py` 재빌드하면
+#   플레이스홀더 박스가 실제 이미지로 일괄 교체됩니다.
+# ---------------------------------------------------------------------------
+GALLERY_READY = False               # 실제 이미지 준비되면 True
+GALLERY_DIR = "/assets/img/gallery"
+GALLERY_COUNT = 21
+
+def gallery_figure(n, alt, caption=""):
+    """n번(1~21) 갤러리 슬롯. 이미지 준비 전에는 플레이스홀더 박스를 렌더."""
+    nn = f"{int(n):02d}"
+    cap = f'<figcaption class="gphoto-cap">{caption}</figcaption>' if caption else ""
+    if GALLERY_READY:
+        media = (f'<picture><source srcset="{GALLERY_DIR}/{nn}.webp" type="image/webp">'
+                 f'<img class="gphoto-img" src="{GALLERY_DIR}/{nn}.jpg" alt="{alt}" '
+                 f'loading="lazy" decoding="async" width="800" height="600"></picture>')
+        return f'<figure class="gphoto">{media}{cap}</figure>'
+    return (f'<figure class="gphoto is-empty" role="img" aria-label="{alt}" data-slot="{nn}">'
+            f'<span class="gphoto-ph"><span class="gphoto-no">{nn}</span>'
+            f'<span class="gphoto-tx">시공사진 준비중</span></span>{cap}</figure>')
+
 # 공식 채널 URL (확정 후 실제 주소로 교체) — 자리표시값
 NAVER_PLACE = "https://map.naver.com/"      # TODO: 네이버 플레이스(스마트플레이스) 실제 URL
 NAVER_BLOG  = "https://blog.naver.com/"      # TODO: 네이버 블로그 실제 URL
